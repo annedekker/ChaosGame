@@ -5,8 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ChaosGame"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+        Title="The Chaos Game" Height="447.812" Width="707.5" Background="#222222">
+    <Grid Margin="8">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0.6*" MinWidth="220" MaxWidth="300"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Ze Magnifizent View -->
+        <Viewbox Grid.RowSpan="2">
+            <Canvas Name="theCanvas" Width="1000" Height="1000"/>
+        </Viewbox>
+
+        <!-- The Magnificent Sidepanel -->
+        <ScrollViewer Grid.Column="1" Margin="0,8">
+            <StackPanel Margin="0,0,8,0">
+                <Button Content="Settings" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+                <Button Content="Drawing" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+                <Button Content="Generation" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+                <Button Content="Export" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- The Magnificent Master Controls -->
+        <StackPanel Grid.Column="1" Grid.Row="1">
+            <Button Content="Clear Chaos" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
+            <Button Content="Generate Every Path" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
+            <Button Content="Auto-Generate Points" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
+            <Button Name="generateManyButton" Content="Generate [5] Points" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateMany_Click"/>
+        </StackPanel>
     </Grid>
 </Window>
