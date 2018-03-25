@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{68A54354-50B7-482D-A67F-632382023E9B}</ProjectGuid>
+    <ProjectGuid>{29F38D52-1669-468E-A868-18DDB6C75ACD}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>ChaosGame</RootNamespace>
     <AssemblyName>ChaosGame</AssemblyName>
@@ -62,6 +62,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="ChaosCode.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
