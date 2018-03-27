@@ -9,6 +9,7 @@
             <Setter Property="Foreground" Value="#000000"/>
             <Setter Property="Background" Value="#cccccc"/>
             <Setter Property="Margin" Value="1"/>
+            <Setter Property="Padding" Value="2"/>
             <Setter Property="BorderThickness" Value="1"/>
 
             <Setter Property="Template">

@@ -69,6 +69,7 @@ namespace ChaosGame
                 else if (value > 64) cornerCount = 64;
                 else cornerCount = value;
 
+                // update corner list
                 if (autoCorners) MakeAutoCorners();
                 else
                 {
@@ -79,6 +80,16 @@ namespace ChaosGame
                         else newcorners[i] = new XYC(0, 0, i);
                     }
                     corners = newcorners.ToList();
+                }
+
+                // remove invalid indexes from excludeindexes
+                for (int i = 0; i < excludeIndexes.Count; i++)
+                {
+                    if (excludeIndexes[i] >= cornerCount)
+                    {
+                        excludeIndexes.RemoveAt(i);
+                        i--;
+                    }
                 }
             }
         }
@@ -98,8 +109,8 @@ namespace ChaosGame
             get { return distanceMoved; }
             set
             {
-                if (value < -3.0) distanceMoved = -3.0;
-                else if (value > 3.0) distanceMoved = 3.0;
+                if (value < 0.0) distanceMoved = 0.0;
+                else if (value > 10.0) distanceMoved = 10.0;
                 else distanceMoved = value;
             }
         }
@@ -202,6 +213,14 @@ namespace ChaosGame
         }
 
         // Corners
+
+        public void SetCornerCoordinate(int index, bool isX, int value)
+        {
+            if (index < 0 || index >= corners.Count) return;
+
+            if (isX) corners[index].x = value;
+            else corners[index].y = value;
+        }
 
         private void MakeAutoCorners()
         {

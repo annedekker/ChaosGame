@@ -18,13 +18,72 @@
 
         <!-- Ze Magnifizent View -->
         <Viewbox Grid.RowSpan="2">
-            <Canvas Name="theCanvas" Width="1000" Height="1000"/>
+            <Canvas Name="theCanvas" Width="1000" Height="1000">
+                <Image Name="wbmpImage"/>
+            </Canvas>
         </Viewbox>
 
         <!-- The Magnificent Sidepanel -->
         <ScrollViewer Grid.Column="1" Margin="0,8">
             <StackPanel Margin="0,0,8,0">
-                <Button Content="Settings" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+                <!-- Settings Panel -->
+                <Button Name="settingsButton" Content="Settings" Style="{StaticResource ChaosDarkButton}" FontSize="14" Click="SideViewControl_Click"/>
+                <StackPanel Name="settingsPanel" Margin="4,2" Visibility="Collapsed">
+                    <!-- Rendering Area Size -->
+                    <DockPanel Margin="0,2">
+                        <Button Content="Ok" DockPanel.Dock="Right" Style="{StaticResource ChaosLightButton}" Padding="5,3" Click="RenderSizeOk_Click"/>
+                        <TextBox Name="renderSizeTextbox" DockPanel.Dock="Right" Width="64" Text="2048" HorizontalContentAlignment="Center" Margin="0,0,4,0"
+                                 VerticalContentAlignment="Center" TextChanged="RenderSizeTextbox_Changed" Height="22"/>
+                        <Label Content="Canvas Size:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Corner Count -->
+                    <DockPanel Margin="0,2">
+                        <Button Name="cornerCountUpButton" Content="+" Style="{StaticResource ChaosLightButton}" DockPanel.Dock="Right" Width="28" Height="28" Click="CornerCountButton_Click"/>
+                        <Button Name="cornerCountDownButton" Content="-" Style="{StaticResource ChaosLightButton}" DockPanel.Dock="Right" Width="28" Height="28" Click="CornerCountButton_Click"/>
+                        <TextBox Name="cornerCountTextbox" Text="3" Width="32" DockPanel.Dock="Right" Height="22" Margin="0,0,4,0" HorizontalContentAlignment="Center" 
+                                 VerticalContentAlignment="Center" TextChanged="CornerCountTextbox_Changed"/>
+                        <Label Content="Amount of Corners:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Auto Corners -->
+                    <DockPanel Margin="0,2">
+                        <CheckBox Name="autoCornerCheckbox" DockPanel.Dock="Right" VerticalAlignment="Bottom" Margin="8,4" IsChecked="True" Checked="AutoCorner_Checked" Unchecked="AutoCorner_Checked"/>
+                        <Label Content="Auto-shape Corners:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Auto Corner Shape Size -->
+                    <DockPanel Name="shapeSizeView" Margin="0,2">
+                        <Button Content="Ok" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="ShapeSizeOk_Click"/>
+                        <TextBox Name="shapeSizeTextbox" Text="2000" Width="64" Height="22" DockPanel.Dock="Right" TextChanged="ShapeSizeTextbox_Changed"/>
+                        <Label Content="Auto-shape Size:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Manual Corners -->
+                    <ScrollViewer Name="manualCornerView" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,2" Visibility="Visible">
+                        <StackPanel Name="manualCornerPanel" Orientation="Horizontal">
+                        </StackPanel>
+                    </ScrollViewer>
+                    <!-- Distance Moved -->
+                    <DockPanel Margin="0,2">
+                        <Label Content="%" Foreground="#cccccc" DockPanel.Dock="Right"/>
+                        <TextBox Text="50" Width="44" DockPanel.Dock="Right" Height="22" HorizontalContentAlignment="Center" TextChanged="DistanceMovedTextbox_Changed"/>
+                        <Label Content="Distance Moved:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Exclude Corners -->
+                    <DockPanel Margin="0,2">
+                        <Button Name="excludeFromLastUpButton" Content="+" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="ExcludeFromLast_Click"/>
+                        <Button Name="excludeFromLastDownButton" Content="-" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="ExcludeFromLast_Click"/>
+                        <Label Name="excludeFromLastLabel" Content="0" Foreground="#cccccc" DockPanel.Dock="Right"/>
+                        <Label Content="Exclude last n corners:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Exclude direction -->
+                    <DockPanel Name="excludeDirectionView" Margin="0,0,0,2" Visibility="Collapsed">
+                        <CheckBox DockPanel.Dock="Right" IsChecked="True" Margin="8,4" VerticalAlignment="Bottom" Checked="ExcludeDirection_Checked" Unchecked="ExcludeDirection_Checked"/>
+                        <Label Content="Exclude Clockwise" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Exclude indexes -->
+                    <ScrollViewer Name="excludeIndexView" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Visibility="Collapsed">
+                        <StackPanel Name="excludeIndexPanel" Orientation="Horizontal">
+                        </StackPanel>
+                    </ScrollViewer>
+                </StackPanel>
                 <Button Content="Drawing" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
                 <Button Content="Generation" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
                 <Button Content="Export" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
@@ -33,7 +92,7 @@
 
         <!-- The Magnificent Master Controls -->
         <StackPanel Grid.Column="1" Grid.Row="1">
-            <Button Content="Clear Chaos" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
+            <Button Content="Clear Chaos" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="ClearChaos_Click"/>
             <Button Content="Generate Every Path" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
             <Button Content="Auto-Generate Points" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
             <Button Name="generateManyButton" Content="Generate [5] Points" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateMany_Click"/>
