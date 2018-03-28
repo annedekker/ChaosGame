@@ -174,7 +174,7 @@
         <!-- The Magnificent Master Controls -->
         <StackPanel Grid.Column="1" Grid.Row="1">
             <Button Content="Clear Chaos" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="ClearChaos_Click"/>
-            <Button Content="Generate Every Path" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
+            <!--<Button Content="Generate Every Path" Style="{StaticResource ChaosLightButton}" FontSize="14"/>-->
             <Button Content="Start Auto-Generation" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateAuto_Click"/>
             <Button Name="generateManyButton" Content="Generate [15000] Points" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateMany_Click"/>
         </StackPanel>
