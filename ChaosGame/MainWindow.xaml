@@ -18,10 +18,39 @@
 
         <!-- Ze Magnifizent View -->
         <Viewbox Grid.RowSpan="2">
-            <Canvas Name="theCanvas" Width="1000" Height="1000">
+            <Canvas Name="theCanvas" Width="1000" Height="1000" ClipToBounds="True">
                 <Image Name="wbmpImage"/>
             </Canvas>
         </Viewbox>
+        
+        <!-- The Magnificent Color Control-->
+        <StackPanel Name="colorControlPanel" Grid.RowSpan="2" Width="260" HorizontalAlignment="Right" VerticalAlignment="Center" Background="#bb222222" Margin="0,0,16,0" Visibility="Collapsed">
+            <Label Name="ccontrolLabel" Content="Currently Editing Color 00" Foreground="#cccccc" FontSize="10" HorizontalContentAlignment="Center"/>
+            <!-- Color Visual-->
+            <Rectangle Name="ccontrolVisual" Height="32" Fill="Aqua" Margin="8,4,8,8"/>
+            <!-- Color Control R-->
+            <DockPanel Margin="8,2">
+                <Label Content="R" Foreground="#cccccc" DockPanel.Dock="Left"/>
+                <TextBox Name="ccontrolRTextbox" Width="32" DockPanel.Dock="Right" Text="255" Height="22" HorizontalContentAlignment="Center" TextChanged="ColorControlTextbox_Changed"/>
+                <Slider Name="ccontrolRSlider" Margin="8,0" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" ValueChanged="ColorControlSlider_Changed"/>
+            </DockPanel>
+            <!-- Color Control G -->
+            <DockPanel Margin="8,2">
+                <Label Content="G" Foreground="#cccccc" DockPanel.Dock="Left"/>
+                <TextBox Name="ccontrolGTextbox" Width="32" DockPanel.Dock="Right" Height="22" HorizontalContentAlignment="Center" TextChanged="ColorControlTextbox_Changed"/>
+                <Slider Name="ccontrolGSlider" Margin="8,0" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" ValueChanged="ColorControlSlider_Changed"/>
+            </DockPanel>
+            <!-- Color Control B -->
+            <DockPanel Margin="8,2">
+                <Label Content="B" Foreground="#cccccc" DockPanel.Dock="Left"/>
+                <TextBox Name="ccontrolBTextbox" Width="32" DockPanel.Dock="Right" Height="22" HorizontalContentAlignment="Center" TextChanged="ColorControlTextbox_Changed"/>
+                <Slider Name="ccontrolBSlider" Margin="8,0" Minimum="0" Maximum="255" IsSnapToTickEnabled="True" ValueChanged="ColorControlSlider_Changed"/>
+            </DockPanel>
+            <!-- Color Control Cancel -->
+            <Button Margin="8,8" Content="Cancel" Click="ColorControlCancel_Click"/>
+            <!-- Color Control Set-->
+            <Button Margin="8,0" Content="Set" Click="ColorControlSet_Click"/>
+        </StackPanel>
 
         <!-- The Magnificent Sidepanel -->
         <ScrollViewer Grid.Column="1" Margin="0,8">
@@ -84,8 +113,53 @@
                         </StackPanel>
                     </ScrollViewer>
                 </StackPanel>
-                <Button Content="Drawing" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
-                <Button Content="Generation" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+                <!-- Drawing Panel -->
+                <Button Name="drawingButton" Content="Drawing" Style="{StaticResource ChaosDarkButton}" FontSize="14" Click="SideViewControl_Click"/>
+                <StackPanel Name="drawingPanel" Margin="4,2" Visibility="Collapsed">
+                    <!-- Draw Corners -->
+                    <DockPanel Margin="0,2">
+                        <CheckBox Margin="8,4" DockPanel.Dock="Left" VerticalAlignment="Center" Checked="DrawCorners_Checked" Unchecked="DrawCorners_Checked"/>
+                        <Button Name="drawCornerColorButton" DockPanel.Dock="Right" Width="28" Height="28" Click="DrawCornerColor_Click"/>
+                        <Label Content="Display Corners" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Draw Shape -->
+                    <DockPanel Margin="0,2">
+                        <CheckBox Margin="8,4" DockPanel.Dock="Left" VerticalAlignment="Center" Checked="DrawShape_Checked" Unchecked="DrawShape_Checked"/>
+                        <Button Name="drawShapeColorButton" DockPanel.Dock="Right" Width="28" Height="28" Click="DrawShapeColor_Click"/>
+                        <Label Content="Display Shape" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <!-- Amount of Colors -->
+                    <DockPanel Margin="0,4,0,2">
+                        <Button Name="colorCountUpButton" Content="+" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="ColorCountButton_Click" IsEnabled="False"/>
+                        <Button Name="colorCountDownButton" Content="-" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="ColorCountButton_Click"/>
+                        <Label Name="colorCountLabel" Content="3" Foreground="#cccccc" DockPanel.Dock="Right" Margin="0,2,0,0"/>
+                        <Label Content="Amount of Colors" Foreground="#cccccc" Margin="0,2,0,0"/>
+                    </DockPanel>
+                    <!-- Color List -->
+                    <StackPanel Name="colorListPanel" Margin="0,4,0,4">
+                        <DockPanel Margin="0,2">
+                            <Button Width="28" Height="28" DockPanel.Dock="Right"/>
+                            <Label Content="Color 00" Foreground="#cccccc"/>
+                        </DockPanel>
+                    </StackPanel>
+                </StackPanel>
+                <!-- Generation Panel -->
+                <Button Name="generationButton" Content="Generation" Style="{StaticResource ChaosDarkButton}" FontSize="14" Click="SideViewControl_Click"/>
+                <StackPanel Name="generationPanel" Margin="4,2" Visibility="Collapsed">
+                    <!-- Auto Generate Speed -->
+                    <DockPanel>
+                        <Button Name="autoGenerateUpButton" Content="+" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="AutoGenerateSpeed_Click"/>
+                        <Button Name="autoGenerateDownButton" Content="-" DockPanel.Dock="Right" Width="28" Height="28" Style="{StaticResource ChaosLightButton}" Click="AutoGenerateSpeed_Click"/>
+                        <Label Name="autoGenerateSpeedLabel" Content="25" DockPanel.Dock="Right" Foreground="#cccccc" Margin="0,2,0,0"/>
+                        <Label Content="Auto-Generate Speed" Foreground="#cccccc" Margin="0,2,0,0"/>
+                    </DockPanel>
+                    <!-- Generate Many Count -->
+                    <DockPanel Margin="0,2">
+                        <TextBox Width="64" Text="15000" DockPanel.Dock="Right" HorizontalContentAlignment="Center" Height="22"/>
+                        <Label Content="Generate  . . .  Points:" Foreground="#cccccc"/>
+                    </DockPanel>
+                </StackPanel>
+                <!-- Export Panel -->
                 <Button Content="Export" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
             </StackPanel>
         </ScrollViewer>
@@ -94,8 +168,8 @@
         <StackPanel Grid.Column="1" Grid.Row="1">
             <Button Content="Clear Chaos" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="ClearChaos_Click"/>
             <Button Content="Generate Every Path" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
-            <Button Content="Auto-Generate Points" Style="{StaticResource ChaosLightButton}" FontSize="14"/>
-            <Button Name="generateManyButton" Content="Generate [5] Points" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateMany_Click"/>
+            <Button Content="Start Auto-Generation" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateAuto_Click"/>
+            <Button Name="generateManyButton" Content="Generate [15000] Points" Style="{StaticResource ChaosLightButton}" FontSize="14" Click="GenerateMany_Click"/>
         </StackPanel>
     </Grid>
 </Window>

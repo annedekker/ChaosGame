@@ -12,21 +12,35 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace ChaosGame
 {
     public partial class MainWindow : Window
     {
+        DispatcherTimer timer;
         WriteableBitmap wbmp;
         ChaosCode chaos;
 
         // color settings
 
+        SolidColorBrush drawCornerColor = Brushes.OrangeRed;
+        SolidColorBrush drawShapeColor = Brushes.HotPink;
+        List<Shape> cornerVisuals = new List<Shape>();
+        List<Shape> shapeVisuals = new List<Shape>();
         List<Color> cornerColors = new List<Color>() { Colors.Aqua, Colors.Gold, Colors.Lime };
 
         // generation settings
 
         int generateManyCount = 15000;
+        int generateAutoCount = 25;
+
+        // color control
+
+        string ccontrolCurrentColor;
+        byte ccontrolRed;
+        byte ccontrolGreen;
+        byte ccontrolBlue;
 
         // init
 
@@ -38,6 +52,15 @@ namespace ChaosGame
             wbmp = new WriteableBitmap(chaos.RenderSize, chaos.RenderSize, 333, 333, PixelFormats.Bgra32, null);
             wbmpImage.Width = wbmpImage.Height = theCanvas.Width = theCanvas.Height = chaos.RenderSize;
             wbmpImage.Source = wbmp;
+
+            timer = new DispatcherTimer();
+            timer.Tick += AutoGenerateTimer_Tick;
+            timer.Interval = new TimeSpan(0, 0, 0, 0, 100);
+
+            drawCornerColorButton.Background = drawCornerColor;
+            drawShapeColorButton.Background = drawShapeColor;
+
+            BuildColorListPanel();
         }
 
         // drawing chaos points
@@ -85,12 +108,38 @@ namespace ChaosGame
             DrawPoints(points);
         }
 
+        private void GenerateAuto_Click(object sender, EventArgs e)
+        {
+            if ((sender as Button).Content.ToString().Contains("Start"))
+            {
+                timer.Start();
+
+                (sender as Button).Content = "Stop Auto-Generation";
+            }
+            else
+            {
+                timer.Stop();
+
+                (sender as Button).Content = "Start Auto-Generation";
+            }
+        }
+
         private void SideViewControl_Click(object sender, EventArgs e)
         {
             if ((sender as Button).Name.Equals("settingsButton"))
             {
                 if (settingsPanel.Visibility == Visibility.Visible) settingsPanel.Visibility = Visibility.Collapsed;
                 else settingsPanel.Visibility = Visibility.Visible;
+            }
+            else if ((sender as Button).Name.Equals("generationButton"))
+            {
+                if (generationPanel.Visibility == Visibility.Visible) generationPanel.Visibility = Visibility.Collapsed;
+                else generationPanel.Visibility = Visibility.Visible;
+            }
+            else if ((sender as Button).Name.Equals("drawingButton"))
+            {
+                if (drawingPanel.Visibility == Visibility.Visible) drawingPanel.Visibility = Visibility.Collapsed;
+                else drawingPanel.Visibility = Visibility.Visible;
             }
         }
 
@@ -143,6 +192,14 @@ namespace ChaosGame
 
             if (!chaos.AutoCorners) BuildManualCornerPanel();
             if (chaos.ExcludeFromLast > 0) BuildExcludeIndexesPanel();
+            if (cornerColors.Count > chaos.CornerCount)
+            {
+                cornerColors = cornerColors.GetRange(0, chaos.CornerCount);
+                BuildColorListPanel();
+                colorCountLabel.Content = cornerColors.Count.ToString();
+            }
+            if (cornerVisuals.Count > 0) DrawCornerVisuals();
+            if (shapeVisuals.Count > 0) DrawShapeVisual();
         }
 
         private void CornerCountTextbox_Changed(object sender, EventArgs e)
@@ -164,6 +221,14 @@ namespace ChaosGame
                     chaos.CornerCount = value;
                     if (!chaos.AutoCorners) BuildManualCornerPanel();
                     if (chaos.ExcludeFromLast > 0) BuildExcludeIndexesPanel();
+                    if (cornerColors.Count > chaos.CornerCount)
+                    {
+                        cornerColors = cornerColors.GetRange(0, chaos.CornerCount);
+                        BuildColorListPanel();
+                        colorCountLabel.Content = cornerColors.Count.ToString();
+                    }
+                    if (cornerVisuals.Count > 0) DrawCornerVisuals();
+                    if (shapeVisuals.Count > 0) DrawShapeVisual();
                 }
             }
             catch (Exception) { }
@@ -179,6 +244,7 @@ namespace ChaosGame
                     shapeSizeView.Visibility = Visibility.Visible;
 
                     chaos.AutoCorners = true;
+                    if (shapeVisuals.Count > 0) DrawShapeVisual();
                 }
                 else
                 {
@@ -187,6 +253,7 @@ namespace ChaosGame
                     shapeSizeView.Visibility = Visibility.Collapsed;
 
                     chaos.AutoCorners = false;
+                    if (shapeVisuals.Count > 0) DrawShapeVisual();
                 }
             }
             catch (NullReferenceException) { }
@@ -213,6 +280,9 @@ namespace ChaosGame
             if (value < 2) value = 2;
 
             chaos.ShapeSize = value;
+
+            if (cornerVisuals.Count > 0) DrawCornerVisuals();
+            if (shapeVisuals.Count > 0) DrawShapeVisual();
         }
 
         private void BuildManualCornerPanel()
@@ -300,6 +370,9 @@ namespace ChaosGame
             }
 
             chaos.SetCornerCoordinate(pos, isX, value);
+
+            if (cornerVisuals.Count > 0) DrawCornerVisuals();
+            if (shapeVisuals.Count > 0) DrawShapeVisual();
         }
 
         private void DistanceMovedTextbox_Changed(object sender, EventArgs e)
@@ -398,6 +471,354 @@ namespace ChaosGame
             {
                 chaos.ExcludeIndexes.Remove(index);
             }
+        }
+
+        // side view - drawing
+
+        private void DrawCorners_Checked(object sender, EventArgs e)
+        {
+            if ((sender as CheckBox).IsChecked == true)
+            {
+                DrawCornerVisuals();
+            }
+            else
+            {
+                foreach (Shape s in cornerVisuals)
+                {
+                    theCanvas.Children.Remove(s);
+                }
+                cornerVisuals.Clear();
+            }
+        }
+
+        private void DrawCornerVisuals()
+        {
+            foreach (Shape s in cornerVisuals)
+            {
+                theCanvas.Children.Remove(s);
+            }
+            cornerVisuals.Clear();
+
+            foreach (XYC c in chaos.Corners)
+            {
+                Rectangle rect = new Rectangle();
+                rect.Width = rect.Height = chaos.RenderSize / 75;
+                rect.Fill = drawCornerColor;
+
+                rect.Margin = new Thickness(
+                    c.x - rect.Width / 2, c.y - rect.Height / 2, 0, 0);
+
+                cornerVisuals.Add(rect);
+                theCanvas.Children.Add(rect);
+            }
+        }
+
+        private void DrawCornerColor_Click(object sender, EventArgs e)
+        {
+            ccontrolCurrentColor = "drawcorner";
+            ccontrolLabel.Content = "Currently Editing Corner Color";
+
+            ccontrolRed = drawCornerColor.Color.R;
+            ccontrolRSlider.Value = ccontrolRed;
+            ccontrolRTextbox.Text = ccontrolRed.ToString();
+
+            ccontrolGreen = drawCornerColor.Color.G;
+            ccontrolGSlider.Value = ccontrolGreen;
+            ccontrolGTextbox.Text = ccontrolGreen.ToString();
+
+            ccontrolBlue = drawCornerColor.Color.B;
+            ccontrolBSlider.Value = ccontrolBlue;
+            ccontrolBTextbox.Text = ccontrolBlue.ToString();
+
+            colorControlPanel.Visibility = Visibility.Visible;
+        }
+
+        private void DrawShape_Checked(object sender, EventArgs e)
+        {
+            if ((sender as CheckBox).IsChecked == true)
+            {
+                DrawShapeVisual();
+            }
+            else
+            {
+                foreach (Shape s in shapeVisuals) theCanvas.Children.Remove(s);
+                shapeVisuals.Clear();
+            }
+        }
+
+        private void DrawShapeVisual()
+        {
+            foreach (Shape s in shapeVisuals) theCanvas.Children.Remove(s);
+            shapeVisuals.Clear();
+
+            if (chaos.AutoCorners)
+            {
+                Ellipse sVisual = new Ellipse();
+                sVisual.Stroke = drawShapeColor;
+                sVisual.StrokeThickness = chaos.RenderSize / 400;
+                sVisual.Width = sVisual.Height = chaos.ShapeSize;
+                sVisual.Margin = new Thickness((chaos.RenderSize - chaos.ShapeSize) / 2, (chaos.RenderSize - chaos.ShapeSize) / 2, 0, 0);
+
+                shapeVisuals.Add(sVisual);
+                theCanvas.Children.Add(sVisual);
+            }
+            else
+            {
+                for (int i = 0; i < chaos.CornerCount; i++)
+                {
+                    Line line = new Line();
+                    line.X1 = chaos.Corners[i].x;
+                    line.Y1 = chaos.Corners[i].y;
+                    if (i == chaos.CornerCount - 1)
+                    {
+                        line.X2 = chaos.Corners[0].x;
+                        line.Y2 = chaos.Corners[0].y;
+                    }
+                    else
+                    {
+                        line.X2 = chaos.Corners[i + 1].x;
+                        line.Y2 = chaos.Corners[i + 1].y;
+                    }
+                    line.Stroke = drawShapeColor;
+                    line.StrokeThickness = chaos.RenderSize / 400;
+
+                    shapeVisuals.Add(line);
+                    theCanvas.Children.Add(line);
+                }
+            }
+        }
+
+        private void DrawShapeColor_Click(object sender, EventArgs e)
+        {
+            ccontrolCurrentColor = "drawshape";
+            ccontrolLabel.Content = "Currently Editing Shape Color";
+
+            ccontrolRed = drawShapeColor.Color.R;
+            ccontrolRSlider.Value = ccontrolRed;
+            ccontrolRTextbox.Text = ccontrolRed.ToString();
+
+            ccontrolGreen = drawShapeColor.Color.G;
+            ccontrolGSlider.Value = ccontrolGreen;
+            ccontrolGTextbox.Text = ccontrolGreen.ToString();
+
+            ccontrolBlue = drawShapeColor.Color.B;
+            ccontrolBSlider.Value = ccontrolBlue;
+            ccontrolBTextbox.Text = ccontrolBlue.ToString();
+
+            colorControlPanel.Visibility = Visibility.Visible;
+        }
+
+        private void ColorCountButton_Click(object sender, EventArgs e)
+        {
+            if ((sender as Button).Content.ToString().Equals("+"))
+            {
+                if (cornerColors.Count == chaos.CornerCount - 1) (sender as Button).IsEnabled = false;
+                colorCountDownButton.IsEnabled = true;
+
+                if (cornerColors.Count >= chaos.CornerCount)
+                {
+                    (sender as Button).IsEnabled = false;
+                    cornerColors = cornerColors.GetRange(0, chaos.CornerCount);
+                }
+                else
+                {
+                    cornerColors.Add(Colors.Black);
+                }
+            }
+            else
+            {
+                if (cornerColors.Count == 2) (sender as Button).IsEnabled = false;
+                colorCountUpButton.IsEnabled = true;
+
+                cornerColors.RemoveAt(cornerColors.Count - 1);
+            }
+
+            BuildColorListPanel();
+            colorCountLabel.Content = cornerColors.Count.ToString();
+        }
+
+        private void BuildColorListPanel()
+        {
+            colorListPanel.Children.Clear();
+
+            for (int i = 0; i < cornerColors.Count; i++)
+            {
+                DockPanel panel = new DockPanel();
+                panel.Margin = new Thickness(0, 2, 0, 2);
+
+                Button btn = new Button();
+                btn.Name = "cc" + i.ToString();
+                btn.Width = btn.Height = 28;
+                btn.Background = new SolidColorBrush(cornerColors[i]);
+                btn.Click += CornerColorButton_Click;
+                DockPanel.SetDock(btn, Dock.Right);
+                panel.Children.Add(btn);
+
+                Label lbl = new Label();
+                lbl.Foreground = new SolidColorBrush(Color.FromRgb(204, 204, 204));
+                lbl.Content = "Color ";
+                if (i < 10) lbl.Content += "0" + i.ToString();
+                else lbl.Content += i.ToString();
+                panel.Children.Add(lbl);
+
+                colorListPanel.Children.Add(panel);
+            }
+        }
+
+        private void CornerColorButton_Click(object sender, EventArgs e)
+        {
+            int index = Int32.Parse((sender as Button).Name.Substring(2));
+
+            ccontrolCurrentColor = (sender as Button).Name;
+            ccontrolLabel.Content = "Currently Editing Color ";
+            if (index < 10) ccontrolLabel.Content += "0" + index.ToString();
+            else ccontrolLabel.Content += index.ToString();
+
+            ccontrolRed = cornerColors[index].R;
+            ccontrolRSlider.Value = ccontrolRed;
+            ccontrolRTextbox.Text = ccontrolRed.ToString();
+
+            ccontrolGreen = cornerColors[index].G;
+            ccontrolGSlider.Value = ccontrolGreen;
+            ccontrolGTextbox.Text = ccontrolGreen.ToString();
+
+            ccontrolBlue = cornerColors[index].B;
+            ccontrolBSlider.Value = ccontrolBlue;
+            ccontrolBTextbox.Text = ccontrolBlue.ToString();
+
+            colorControlPanel.Visibility = Visibility.Visible;
+        }
+
+        // Color control
+
+        private void ColorControlSlider_Changed(object sender, EventArgs e)
+        {
+            byte value = (Byte)(sender as Slider).Value;
+
+            if ((sender as Slider).Name.Contains("RSlider"))
+            {
+                ccontrolRed = value;
+                ccontrolRTextbox.Text = ccontrolRed.ToString();
+            }
+            else if ((sender as Slider).Name.Contains("GSlider"))
+            {
+                ccontrolGreen = value;
+                ccontrolGTextbox.Text = ccontrolGreen.ToString();
+            }
+            else
+            {
+                ccontrolBlue = value;
+                ccontrolBTextbox.Text = ccontrolBlue.ToString();
+            }
+
+            ccontrolVisual.Fill = new SolidColorBrush(Color.FromRgb(ccontrolRed, ccontrolGreen, ccontrolBlue));
+        }
+
+        private void ColorControlTextbox_Changed(object sender, EventArgs e)
+        {
+            if ((sender as TextBox).Text.Length < 1) return;
+
+            byte value;
+            if (!Byte.TryParse((sender as TextBox).Text, out value)) value = 0;
+
+            try
+            {
+                if ((sender as TextBox).Name.Contains("RTextbox"))
+                {
+                    ccontrolRed = value;
+                    ccontrolRTextbox.Text = value.ToString();
+                    ccontrolRSlider.Value = ccontrolRed;
+                }
+                else if ((sender as TextBox).Name.Contains("GTextbox"))
+                {
+                    ccontrolGreen = value;
+                    ccontrolGTextbox.Text = value.ToString();
+                    ccontrolGSlider.Value = ccontrolGreen;
+                }
+                else
+                {
+                    ccontrolBlue = value;
+                    ccontrolBTextbox.Text = value.ToString();
+                    ccontrolBSlider.Value = ccontrolBlue;
+                }
+            }
+            catch (NullReferenceException) { }
+
+            ccontrolVisual.Fill = new SolidColorBrush(Color.FromRgb(ccontrolRed, ccontrolGreen, ccontrolBlue));
+        }
+
+        private void ColorControlCancel_Click(object sender, EventArgs e)
+        {
+            colorControlPanel.Visibility = Visibility.Collapsed;
+        }
+
+        private void ColorControlSet_Click(object sender, EventArgs e)
+        {
+            if (ccontrolCurrentColor.Equals("drawcorner"))
+            {
+                drawCornerColor = new SolidColorBrush(Color.FromRgb(ccontrolRed, ccontrolGreen, ccontrolBlue));
+                drawCornerColorButton.Background = drawCornerColor;
+                if (cornerVisuals.Count > 0) DrawCornerVisuals();
+            }
+            else if (ccontrolCurrentColor.Equals("drawshape"))
+            {
+                drawShapeColor = new SolidColorBrush(Color.FromRgb(ccontrolRed, ccontrolGreen, ccontrolBlue));
+                drawShapeColorButton.Background = drawShapeColor;
+                if (shapeVisuals.Count > 0) DrawShapeVisual();
+            }
+            else
+            {
+                int index = Int32.Parse(ccontrolCurrentColor.Substring(2));
+
+                cornerColors[index] = Color.FromRgb(ccontrolRed, ccontrolGreen, ccontrolBlue);
+                BuildColorListPanel();
+            }
+
+            colorControlPanel.Visibility = Visibility.Collapsed;
+        }
+
+        // side view - generation
+
+        private void AutoGenerateTimer_Tick(object sender, EventArgs e)
+        {
+            List<XYC> points = chaos.GetChaosPoints(generateAutoCount);
+            DrawPoints(points);
+        }
+
+        private void AutoGenerateSpeed_Click(object sender, EventArgs e)
+        {
+            if ((sender as Button).Content.ToString().Equals("+"))
+            {
+                if (generateAutoCount == 70) (sender as Button).IsEnabled = false;
+                autoGenerateDownButton.IsEnabled = true;
+
+                generateAutoCount += 5;
+                autoGenerateSpeedLabel.Content = generateAutoCount.ToString();
+            }
+            else
+            {
+                if (generateAutoCount == 10) (sender as Button).IsEnabled = false;
+                autoGenerateDownButton.IsEnabled = true;
+
+                generateAutoCount -= 5;
+                autoGenerateSpeedLabel.Content = generateAutoCount.ToString();
+            }
+        }
+
+        private void GenerateManyTextbox_Changed(object sender, EventArgs e)
+        {
+            if ((sender as TextBox).Text.Length < 1) return;
+
+            int value;
+            if (!Int32.TryParse((sender as TextBox).Text, out value)) value = 500;
+
+            if (value == 0) return;
+            if (value < 0) value = value * -1;
+            if (value > 50000) value = 50000;
+
+            generateManyCount = value;
+            (sender as TextBox).Text = value.ToString();
+            generateManyButton.Content = "Generate [" + value.ToString() + "] Points";
         }
     }
 }
