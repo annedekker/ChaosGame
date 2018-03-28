@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,6 +23,8 @@ namespace ChaosGame
         DispatcherTimer timer;
         WriteableBitmap wbmp;
         ChaosCode chaos;
+
+        string pictureFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures);
 
         // color settings
 
@@ -140,6 +144,11 @@ namespace ChaosGame
             {
                 if (drawingPanel.Visibility == Visibility.Visible) drawingPanel.Visibility = Visibility.Collapsed;
                 else drawingPanel.Visibility = Visibility.Visible;
+            }
+            else if ((sender as Button).Name.Equals("exportButton"))
+            {
+                if (exportPanel.Visibility == Visibility.Visible) exportPanel.Visibility = Visibility.Collapsed;
+                else exportPanel.Visibility = Visibility.Visible;
             }
         }
 
@@ -819,6 +828,43 @@ namespace ChaosGame
             generateManyCount = value;
             (sender as TextBox).Text = value.ToString();
             generateManyButton.Content = "Generate [" + value.ToString() + "] Points";
+        }
+
+        // side view - export
+
+        private void ExportSize_Changed(object sender, EventArgs e)
+        {
+            if ((sender as TextBox).Text.Length < 1) return;
+
+            int value;
+            if (!Int32.TryParse((sender as TextBox).Text, out value)) value = 512;
+
+            if (value < 1) value = 1;
+            else if (value > 32768) value = 32768;
+
+            (sender as TextBox).Text = value.ToString();
+        }
+
+        private void ExportImage_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "PNG File (*.png)|*.png";
+            sfd.InitialDirectory = pictureFolder;
+
+            if (sfd.ShowDialog() == true)
+            {
+                int size = Int32.Parse(exportSizeTextbox.Text);
+                pictureFolder = sfd.FileName;
+
+                using (FileStream fs = new FileStream(sfd.FileName, FileMode.Create))
+                {
+                    PngBitmapEncoder enc = new PngBitmapEncoder();
+                    enc.Interlace = PngInterlaceOption.On;
+                    enc.Frames.Add(BitmapFrame.Create(wbmp.Resize(size, size, WriteableBitmapExtensions.Interpolation.Bilinear)));
+                    enc.Save(fs);
+                    fs.Close();
+                }
+            }
         }
     }
 }

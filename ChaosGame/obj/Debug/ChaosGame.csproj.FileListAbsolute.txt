@@ -13,3 +13,6 @@ C:\Users\Gebruiker\Documents\GitHub\ChaosGame\ChaosGame\obj\Debug\ChaosGame.Prop
 C:\Users\Gebruiker\Documents\GitHub\ChaosGame\ChaosGame\obj\Debug\ChaosGame.csproj.GenerateResource.Cache
 C:\Users\Gebruiker\Documents\GitHub\ChaosGame\ChaosGame\obj\Debug\ChaosGame.exe
 C:\Users\Gebruiker\Documents\GitHub\ChaosGame\ChaosGame\obj\Debug\ChaosGame.pdb
+C:\Users\Gebruiker\Documents\Github\ChaosGame\ChaosGame\bin\Debug\WriteableBitmapEx.Wpf.dll
+C:\Users\Gebruiker\Documents\Github\ChaosGame\ChaosGame\bin\Debug\WriteableBitmapEx.Wpf.pdb
+C:\Users\Gebruiker\Documents\Github\ChaosGame\ChaosGame\bin\Debug\WriteableBitmapEx.Wpf.xml

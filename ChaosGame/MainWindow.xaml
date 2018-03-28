@@ -160,7 +160,14 @@
                     </DockPanel>
                 </StackPanel>
                 <!-- Export Panel -->
-                <Button Content="Export" Style="{StaticResource ChaosDarkButton}" FontSize="14"/>
+                <Button Name="exportButton" Content="Export" Style="{StaticResource ChaosDarkButton}" FontSize="14" Click="SideViewControl_Click"/>
+                <StackPanel Name="exportPanel">
+                    <DockPanel Margin="0,2">
+                        <TextBox Name="exportSizeTextbox" Width="64" DockPanel.Dock="Right" Text="512" HorizontalContentAlignment="Center" Height="22" TextChanged="ExportSize_Changed"/>
+                        <Label Content="Export Size:" Foreground="#cccccc"/>
+                    </DockPanel>
+                    <Button Margin="0,2" Content="Export As Image" Click="ExportImage_Click"/>
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
 
